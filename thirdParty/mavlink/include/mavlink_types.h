@@ -87,7 +87,6 @@ enum MAV_STATE
     MAV_STATE_ACTIVE,
     MAV_STATE_CRITICAL,
     MAV_STATE_EMERGENCY,
-    MAV_STATE_HILSIM,
     MAV_STATE_POWEROFF
 };
 
@@ -168,35 +167,36 @@ typedef struct __mavlink_system {
 } mavlink_system_t;
 
 typedef struct __mavlink_message {
+    uint8_t ck_a;    ///< Checksum high byte
+    uint8_t ck_b;    ///< Checksum low byte
+    uint8_t STX;     ///< start of packet marker
     uint8_t len;     ///< Length of payload
     uint8_t seq;     ///< Sequence of packet
     uint8_t sysid;   ///< ID of message sender system/aircraft
     uint8_t compid;  ///< ID of the message sender component
     uint8_t msgid;   ///< ID of message in payload
     uint8_t payload[MAVLINK_MAX_PAYLOAD_LEN]; ///< Payload data, ALIGNMENT IMPORTANT ON MCU
+} mavlink_message_t;
+
+typedef struct __mavlink_header {
     uint8_t ck_a;    ///< Checksum high byte
     uint8_t ck_b;    ///< Checksum low byte
-} mavlink_message_t;
+    uint8_t STX;     ///< start of packet marker
+    uint8_t len;     ///< Length of payload
+    uint8_t seq;     ///< Sequence of packet
+    uint8_t sysid;   ///< ID of message sender system/aircraft
+    uint8_t compid;  ///< ID of the message sender component
+    uint8_t msgid;   ///< ID of message in payload
+} mavlink_header_t;
 
 typedef enum {
     MAVLINK_COMM_0,
     MAVLINK_COMM_1,
     MAVLINK_COMM_2,
-    MAVLINK_COMM_3
-} mavlink_channel_t;
-
-/*
- * applications can set MAVLINK_COMM_NUM_BUFFERS to the maximum number
- * of buffers they will use. If more are used, then the result will be
- * a stack overrun
- */
-#ifndef MAVLINK_COMM_NUM_BUFFERS
-#if (defined linux) | (defined __linux) | (defined  __MACH__) | (defined _WIN32)
-# define MAVLINK_COMM_NUM_BUFFERS 16
-#else
-# define MAVLINK_COMM_NUM_BUFFERS 4
-#endif
-#endif
+    MAVLINK_COMM_3,
+    MAVLINK_COMM_NB,
+    MAVLINK_COMM_NB_HIGH = 16
+                       } mavlink_channel_t;
 
 typedef enum {
     MAVLINK_PARSE_STATE_UNINIT=0,

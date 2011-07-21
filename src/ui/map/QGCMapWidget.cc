@@ -110,7 +110,8 @@ void QGCMapWidget::showEvent(QShowEvent* event)
 
     // Start timer
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateGlobalPosition()));
-    updateTimer.start(maxUpdateInterval*1000);
+//    updateTimer.start(maxUpdateInterval*1000);
+    updateTimer.start(maxUpdateInterval*10);
     updateGlobalPosition();
     QTimer::singleShot(1, this, SLOT(loadSettings()));
 }
@@ -361,7 +362,8 @@ void QGCMapWidget::goHome()
 void QGCMapWidget::setUpdateRateLimit(float seconds)
 {
     maxUpdateInterval = seconds;
-    updateTimer.start(maxUpdateInterval*1000);
+//    updateTimer.start(maxUpdateInterval*1000);
+    updateTimer.start(maxUpdateInterval*10);
 }
 
 void QGCMapWidget::cacheVisibleRegion()

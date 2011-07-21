@@ -179,9 +179,11 @@ void MAVLinkProtocol::receiveBytes(LinkInterface* link, QByteArray b)
     mavlink_message_t message;
     mavlink_status_t status;
     for (int position = 0; position < b.size(); position++) {
-        unsigned int decodeState = mavlink_parse_char(link->getId(), (uint8_t)(b.at(position)), &message, &status);
+//        unsigned int decodeState = mavlink_parse_char(link->getId(), (uint8_t)(b.at(position)), &message, &status);
+        mavlink_message_t* decodeState = mavlink_parse_char(link->getId(), (uint8_t)(b.at(position)), &message, &status);
 
-        if (decodeState == 1) {
+//        if (decodeState == 1) {
+		if (decodeState != NULL) {
 #ifdef MAVLINK_MESSAGE_LENGTHS
 	    const uint8_t message_lengths[] = MAVLINK_MESSAGE_LENGTHS;
 	    if (message.msgid >= sizeof(message_lengths) ||
@@ -194,6 +196,7 @@ void MAVLinkProtocol::receiveBytes(LinkInterface* link, QByteArray b)
             if (m_loggingEnabled && m_logfile) {
                 const int len = MAVLINK_MAX_PACKET_LEN+sizeof(quint64);
                 uint8_t buf[len];
+                memset(buf,0,len);  // clear buffer so you can see shit in log
                 quint64 time = QGC::groundTimeUsecs();
                 memcpy(buf, (void*)&time, sizeof(quint64));
                 // Write message to buffer

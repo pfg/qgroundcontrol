@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <mavlink>
-<version>2</version>
+<version>3</version>
 
 <enums>
     <enum name="MAV_CMD" >
@@ -359,7 +359,7 @@
     <description>Emit an encrypted signature / key identifying this system. PLEASE NOTE: This protocol has been kept simple, so transmitting the key requires an encrypted channel for true safety.</description>
     <field name="key" type="char[32]">key</field>
   </message>
-  
+
    <message name="ACTION_ACK" id="9">
 	<description>This message acknowledges an action. IMPORTANT: The acknowledgement can be also negative, e.g. the MAV rejects a reset message because it is in-flight. The action ids are defined in ENUM MAV_ACTION in mavlink/include/mavlink_types.h</description>
      <field name="action" type="uint8_t">The action id</field>
@@ -389,7 +389,7 @@
      <description>Request to read the onboard parameter with the param_id string id. Onboard parameters are stored as key[const char*] -> value[float]. This allows to send a parameter to any other component (such as the GCS) without the need of previous knowledge of possible parameter names. Thus the same GCS can store different parameters for different autopilots. See also http://qgroundcontrol.org/parameter_interface for a full documentation of QGroundControl and IMU code.</description>
      <field name="target_system" type="uint8_t">System ID</field>
      <field name="target_component" type="uint8_t">Component ID</field>
-     <field name="param_id" type="array[15]">Onboard parameter id</field>
+     <field name="param_id" type="array[16]">Onboard parameter id</field>
      <field name="param_index" type="int16_t">Parameter index. Send -1 to use the param ID field as identifier</field>
    </message>
 
@@ -401,7 +401,7 @@
 
    <message name="PARAM_VALUE" id="22">
      <description>Emit the value of a onboard parameter. The inclusion of param_count and param_index in the message allows the recipient to keep track of received parameters and allows him to re-request missing parameters after a loss or timeout.</description>
-     <field name="param_id" type="array[15]">Onboard parameter id</field>
+     <field name="param_id" type="array[16]">Onboard parameter id</field>
      <field name="param_value" type="float">Onboard parameter value</field>
      <field name="param_count" type="uint16_t">Total number of onboard parameters</field>
      <field name="param_index" type="uint16_t">Index of this onboard parameter</field>
@@ -411,7 +411,7 @@
      <description>Set a parameter value TEMPORARILY to RAM. It will be reset to default on system reboot. Send the ACTION MAV_ACTION_STORAGE_WRITE to PERMANENTLY write the RAM contents to EEPROM. IMPORTANT: The receiving component should acknowledge the new parameter value by sending a param_value message to all communication partners. This will also ensure that multiple GCS all have an up-to-date list of all parameters. If the sending GCS did not receive a PARAM_VALUE message within its timeout time, it should re-send the PARAM_SET message.</description>
      <field name="target_system" type="uint8_t">System ID</field>
      <field name="target_component" type="uint8_t">Component ID</field>
-     <field name="param_id" type="array[15]">Onboard parameter id</field>
+     <field name="param_id" type="array[16]">Onboard parameter id</field>
      <field name="param_value" type="float">Onboard parameter value</field>
    </message>
    
@@ -420,13 +420,13 @@
 NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame)</description>
      <field name="usec" type="uint64_t">Timestamp (microseconds since UNIX epoch or microseconds since system boot)</field>
      <field name="fix_type" type="uint8_t">0-1: no fix, 2: 2D fix, 3: 3D fix. Some applications will not use the value of this field unless it is at least two, so always correctly fill in the fix.</field>
-     <field name="lat"   type="int32_t">Latitude in 1E7 degrees</field>
-     <field name="lon"   type="int32_t">Longitude in 1E7 degrees</field>
-     <field name="alt"   type="int32_t">Altitude in 1E3 meters (millimeters)</field>
-     <field name="eph"  type="float">GPS HDOP</field>
-     <field name="epv"  type="float">GPS VDOP</field>
-     <field name="v"  type="float">GPS ground speed (m/s)</field>
-     <field name="hdg"  type="float">Compass heading in degrees, 0..360 degrees</field>
+     <field name="lat"   type="int32_t" offset="-1">Latitude in 1E7 degrees</field>
+     <field name="lon"   type="int32_t" offset="-1">Longitude in 1E7 degrees</field>
+     <field name="alt"   type="int32_t" offset="-1">Altitude in 1E3 meters (millimeters)</field>
+     <field name="eph"  type="float" offset="-1">GPS HDOP</field>
+     <field name="epv"  type="float" offset="-1">GPS VDOP</field>
+     <field name="v"  type="float" offset="-1">GPS ground speed (m/s)</field>
+     <field name="hdg"  type="float" offset="-1">Compass heading in degrees, 0..360 degrees</field>
    </message>
    
    <message name="SCALED_IMU" id="26">
@@ -438,9 +438,9 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <field name="xgyro" type="int16_t">Angular speed around X axis (millirad /sec)</field>
      <field name="ygyro" type="int16_t">Angular speed around Y axis (millirad /sec)</field>
      <field name="zgyro" type="int16_t">Angular speed around Z axis (millirad /sec)</field>
-     <field name="xmag"  type="int16_t">X Magnetic field (milli tesla)</field>
-     <field name="ymag"  type="int16_t">Y Magnetic field (milli tesla)</field>
-     <field name="zmag"  type="int16_t">Z Magnetic field (milli tesla)</field>
+     <field name="xmag"  type="int16_t">X Magnetic field (micro tesla)</field>
+     <field name="ymag"  type="int16_t">Y Magnetic field (micro tesla)</field>
+     <field name="zmag"  type="int16_t">Z Magnetic field (micro tesla)</field>
    </message>
    
    <message name="GPS_STATUS" id="27">
@@ -476,15 +476,6 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <field name="temperature"  type="int16_t">Raw Temperature measurement (raw)</field>
    </message>
 
-  <message name="SCALED_PRESSURE" id="38">
-     <description>The pressure readings for the typical setup of one absolute and differential pressure sensor. The units are as specified in each field.</description>
-     <field name="usec"  type="uint64_t">Timestamp (microseconds since UNIX epoch or microseconds since system boot)</field>
-     <field name="press_abs"  type="float">Absolute pressure (hectopascal)</field>
-     <field name="press_diff"  type="float">Differential pressure 1 (hectopascal)</field>
-     <field name="temperature"  type="int16_t">Temperature measurement (0.01 degrees celsius)</field>
-   </message>
-
-
    <message name="ATTITUDE" id="30">
     <description>The attitude in the aeronautical frame (right-handed, Z-down, X-front, Y-right).</description>
      <field name="usec"  type="uint64_t">Timestamp (microseconds since UNIX epoch or microseconds since system boot)</field>
@@ -507,7 +498,6 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <field name="vz"  type="float">Z Speed</field>
    </message>
    
-
    <message name="GLOBAL_POSITION" id="33">
      <description>The filtered global position (e.g. fused GPS and accelerometers). Coordinate frame is right-handed, Z-axis up (GPS frame)</description>
      <field name="usec" type="uint64_t">Timestamp (microseconds since unix epoch)</field>
@@ -524,13 +514,13 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
 NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame)</description>
      <field name="usec" type="uint64_t">Timestamp (microseconds since UNIX epoch or microseconds since system boot)</field>
      <field name="fix_type" type="uint8_t">0-1: no fix, 2: 2D fix, 3: 3D fix. Some applications will not use the value of this field unless it is at least two, so always correctly fill in the fix.</field>
-     <field name="lat"   type="float">Latitude in degrees</field>
-     <field name="lon"   type="float">Longitude in degrees</field>
-     <field name="alt"   type="float">Altitude in meters</field>
-     <field name="eph"  type="float">GPS HDOP</field>
-     <field name="epv"  type="float">GPS VDOP</field>
-     <field name="v"  type="float">GPS ground speed</field>
-     <field name="hdg"  type="float">Compass heading in degrees, 0..360 degrees</field>
+     <field name="lat"   type="float" offset="-1">Latitude in degrees</field>
+     <field name="lon"   type="float" offset="-1">Longitude in degrees</field>
+     <field name="alt"   type="float" offset="-1">Altitude in meters</field>
+     <field name="eph"  type="float" offset="-1">GPS HDOP</field>
+     <field name="epv"  type="float" offset="-1">GPS VDOP</field>
+     <field name="v"  type="float" offset="-1">GPS ground speed</field>
+     <field name="hdg"  type="float" offset="-1">Compass heading in degrees, 0..360 degrees</field>
    </message>
 
    <message name="SYS_STATUS" id="34">
@@ -538,10 +528,10 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <field name="mode" type="uint8_t">System mode, see MAV_MODE ENUM in mavlink/include/mavlink_types.h</field>
      <field name="nav_mode" type="uint8_t">Navigation mode, see MAV_NAV_MODE ENUM</field>
      <field name="status" type="uint8_t">System status flag, see MAV_STATUS ENUM</field>
-     <field name="load" type="uint16_t">Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000</field>
-     <field name="vbat" type="uint16_t">Battery voltage, in millivolts (1 = 1 millivolt)</field>
-     <field name="battery_remaining" type="uint16_t">Remaining battery energy: (0%: 0, 100%: 1000)</field>
-     <field name="packet_drop" type="uint16_t">Dropped packets (packets that were corrupted on reception on the MAV)</field>
+     <field name="load" type="uint16_t" offset="-1">Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000</field>
+     <field name="vbat" type="uint16_t" offset="-1">Battery voltage, in millivolts (1 = 1 millivolt)</field>
+     <field name="battery_remaining" type="uint16_t" offset="-1">Remaining battery energy: (0%: 0, 100%: 1000)</field>
+     <field name="packet_drop" type="uint16_t" offset="-1">Dropped packets (packets that were corrupted on reception on the MAV)</field>
    </message>
 
    <message name="RC_CHANNELS_RAW" id="35">
@@ -570,7 +560,7 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <field name="rssi" type="uint8_t">Receive signal strength indicator, 0: 0%, 255: 100%</field>
    </message>
    
-     <message name="SERVO_OUTPUT_RAW" id="37">
+  <message name="SERVO_OUTPUT_RAW" id="37">
     <description>The RAW values of the servo outputs (for RC input from the remote, use the RC_CHANNELS messages). The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%.</description>
     <field name="servo1_raw" type="uint16_t">Servo output 1 value, in microseconds</field>
     <field name="servo2_raw" type="uint16_t">Servo output 2 value, in microseconds</field>
@@ -580,7 +570,15 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
     <field name="servo6_raw" type="uint16_t">Servo output 6 value, in microseconds</field>
     <field name="servo7_raw" type="uint16_t">Servo output 7 value, in microseconds</field>
     <field name="servo8_raw" type="uint16_t">Servo output 8 value, in microseconds</field>
-  </message> 
+   </message> 
+
+  <message name="SCALED_PRESSURE" id="38">
+     <description>The pressure readings for the typical setup of one absolute and differential pressure sensor. The units are a specified in each field.</description>
+     <field name="usec"  type="uint64_t">Timestamp (microseconds since UNIX epoch or microseconds since system boot)</field>
+     <field name="press_abs"  type="float">Absolute pressure (hectopascal)</field>
+     <field name="press_diff"  type="float">Differential pressure 1 (hectopascal)</field>
+     <field name="temperature"  type="int16_t">Temperature measurement (0.01 degrees celsius)</field>
+   </message>
 
    <message name="WAYPOINT" id="39">
      <description>Message encoding a waypoint. This message is emitted to announce
@@ -655,9 +653,9 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <description>As local waypoints exist, the global waypoint reference allows to transform between the local coordinate frame and the global (GPS) coordinate frame. This can be necessary when e.g. in- and outdoor settings are connected and the MAV should move from in- to outdoor.</description>
      <field name="target_system" type="uint8_t">System ID</field>
      <field name="target_component" type="uint8_t">Component ID</field>
-     <field name="latitude" type="int32_t">global position * 1E7</field>
-     <field name="longitude" type="int32_t">global position * 1E7</field>
-     <field name="altitude" type="int32_t">global position * 1000</field>
+     <field name="latitude" type="uint32_t">global position * 1E7</field>
+     <field name="longitude" type="uint32_t">global position * 1E7</field>
+     <field name="altitude" type="uint32_t">global position * 1000</field>
    </message>
    
    <message name="GPS_LOCAL_ORIGIN_SET" id="49">
@@ -701,23 +699,23 @@ NOT the global position estimate of the sytem, but rather a RAW sensor value. Se
      <field name="target_system" type="uint8_t">System ID</field>
      <field name="target_component" type="uint8_t">Component ID</field>
      <field name="frame" type="uint8_t">Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.</field>
-     <field name="p1x" type="float">x position 1 / Latitude 1</field>
-     <field name="p1y" type="float">y position 1 / Longitude 1</field>
-     <field name="p1z" type="float">z position 1 / Altitude 1</field>
-     <field name="p2x" type="float">x position 2 / Latitude 2</field>
-     <field name="p2y" type="float">y position 2 / Longitude 2</field>
-     <field name="p2z" type="float">z position 2 / Altitude 2</field>
+     <field name="p1x" type="float" offset="-1">x position 1 / Latitude 1</field>
+     <field name="p1y" type="float" offset="-1">y position 1 / Longitude 1</field>
+     <field name="p1z" type="float" offset="-1">z position 1 / Altitude 1</field>
+     <field name="p2x" type="float" offset="-1">x position 2 / Latitude 2</field>
+     <field name="p2y" type="float" offset="-1">y position 2 / Longitude 2</field>
+     <field name="p2z" type="float" offset="-1">z position 2 / Altitude 2</field>
    </message>
    
    <message name="SAFETY_ALLOWED_AREA" id="54">
      <description>Read out the safety zone the MAV currently assumes.</description>
      <field name="frame" type="uint8_t">Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.</field>
-     <field name="p1x" type="float">x position 1 / Latitude 1</field>
-     <field name="p1y" type="float">y position 1 / Longitude 1</field>
-     <field name="p1z" type="float">z position 1 / Altitude 1</field>
-     <field name="p2x" type="float">x position 2 / Latitude 2</field>
-     <field name="p2y" type="float">y position 2 / Longitude 2</field>
-     <field name="p2z" type="float">z position 2 / Altitude 2</field>
+     <field name="p1x" type="float" offset="-1">x position 1 / Latitude 1</field>
+     <field name="p1y" type="float" offset="-1">y position 1 / Longitude 1</field>
+     <field name="p1z" type="float" offset="-1">z position 1 / Altitude 1</field>
+     <field name="p2x" type="float" offset="-1">x position 2 / Latitude 2</field>
+     <field name="p2y" type="float" offset="-1">y position 2 / Longitude 2</field>
+     <field name="p2z" type="float" offset="-1">z position 2 / Altitude 2</field>
    </message>
 
    <message name="ATTITUDE_CONTROLLER_OUTPUT" id="60">
@@ -774,23 +772,23 @@ of the controller before actual flight and to assist with tuning controller para
 
    <message name="SET_ALTITUDE" id="65">
      <field name="target" type="uint8_t">The system setting the altitude</field>
-     <field name="mode" type="uint32_t">The new altitude in meters</field>
+     <field name="mode" type="uint32_t" offset="-1">The new altitude in meters</field>
    </message>
 
   <message name="REQUEST_DATA_STREAM" id="66">
      <field name="target_system" type="uint8_t">The target requested to send the message stream.</field>
      <field name="target_component" type="uint8_t">The target requested to send the message stream.</field>
      <field name="req_stream_id" type="uint8_t">The ID of the requested message type</field>
-     <field name="req_message_rate" type="uint16_t">The requested interval between two messages of this type</field>
+     <field name="req_message_rate" type="uint16_t" offset="-1">The requested interval between two messages of this type</field>
      <field name="start_stop" type="uint8_t">1 to start sending, 0 to stop sending.</field>
    </message>
 
    <message name="MANUAL_CONTROL" id="69">
      <field name="target" type="uint8_t">The system to be controlled</field>
-     <field name="roll" type="float">roll</field>
-     <field name="pitch" type="float">pitch</field>
-     <field name="yaw" type="float">yaw</field>
-     <field name="thrust" type="float">thrust</field>
+     <field name="roll" type="float" offset="-1">roll</field>
+     <field name="pitch" type="float" offset="-1">pitch</field>
+     <field name="yaw" type="float" offset="-1">yaw</field>
+     <field name="thrust" type="float" offset="-1">thrust</field>
      <field name="roll_manual" type="uint8_t">roll control enabled auto:0, manual:1</field>
      <field name="pitch_manual" type="uint8_t">pitch auto:0, manual:1</field>
      <field name="yaw_manual" type="uint8_t">yaw auto:0, manual:1</field>
@@ -837,10 +835,15 @@ of the controller before actual flight and to assist with tuning controller para
    
    <!-- MESSAGE IDs 80 - 250: Space for custom messages in individual projectname_messages.xml files -->
 
+<message name="MEMORY_VECT" id="250">
+     <description>Send raw controller memory. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output.</description>
+     <field name="address"  type="uint16_t">Starting address of the debug variables</field>
+     <field name="ver"  type="uint8_t">Version code of the type variable. 0=unknown, type ignored and assumed int16_t. 1=as below</field>
+     <field name="type"  type="uint8_t">Type code of the memory variables. for ver = 1: 0=16 x int16_t, 1=16 x uint16_t, 2=16 x Q15, 3=16 x 1Q14</field>
+     <field name="value"  type="array[32]">Memory contents at specified address</field>
+   </message>
 
-
-
-  <message name="DEBUG_VECT" id="251">
+<message name="DEBUG_VECT" id="251">
      <field name="name" type="char[10]">Name</field>
      <field name="usec" type="uint64_t">Timestamp</field>
      <field name="x" type="float">x</field>
@@ -869,7 +872,7 @@ of the controller before actual flight and to assist with tuning controller para
 <message name="DEBUG" id="255">
      <description>Send a debug value. The index is used to discriminate between values. These values show up in the plot of QGroundControl as DEBUG N.</description>
      <field name="ind"  type="uint8_t">index of debug variable</field>
-     <field name="value"  type="float">DEBUG value</field>
+     <field name="value"  type="float" offset="-1">DEBUG value</field>
    </message>
 
 </messages>

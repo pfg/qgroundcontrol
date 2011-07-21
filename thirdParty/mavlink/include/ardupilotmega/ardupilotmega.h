@@ -1,7 +1,7 @@
 /** @file
  *	@brief MAVLink comm protocol.
  *	@see http://pixhawk.ethz.ch/software/mavlink
- *	 Generated on Thursday, March 31 2011, 22:06 UTC
+ *	 Generated on Monday, April 18 2011, 23:52 UTC
  */
 #ifndef ARDUPILOTMEGA_H
 #define ARDUPILOTMEGA_H
